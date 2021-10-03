@@ -1,0 +1,19 @@
+body {
+  overflow: hidden;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+
+  canvas {
+    outline: none;
+  }
+}
+
+.tp-dfwv {
+  width: 350px !important;
+}
