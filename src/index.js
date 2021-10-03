@@ -8,7 +8,10 @@ import {
   Color,
   Clock,
   SphereGeometry,
-  MeshBasicMaterial
+  MeshBasicMaterial,
+  InstancedMesh,
+  Vector3,
+  Object3D
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -20,7 +23,9 @@ class App {
   constructor(container) {
     this.container = document.querySelector(container)
 
-    this.config
+    this.config = {
+      particlesCount: 1000
+    }
 
     this._resizeCb = () => this._onResize()
   }
@@ -31,6 +36,7 @@ class App {
     this._createRenderer()
     this._createSphere()
     this._createSampler()
+    this._createParticles()
     this._createClock()
     this._addListeners()
     this._createControls()
@@ -88,16 +94,41 @@ class App {
 
     const mat = new MeshBasicMaterial({
       color: 0xffffff,
-      wireframe: true
+      wireframe: true,
+      opacity: 0.1,
+      transparent: true
     })
 
     this.sphere = new Mesh(geom, mat)
 
-    this.scene.add(this.sphere)
+    // this.scene.add(this.sphere)
   }
 
   _createSampler() {
     this.sampler = new MeshSurfaceSampler(this.sphere).build()
+  }
+
+  _createParticles() {
+    const geom = new SphereGeometry(0.02, 6, 6)
+
+    const material = new MeshBasicMaterial({
+      color: 0xff0000
+    })
+
+    const particles = new InstancedMesh(geom, material, this.config.particlesCount)
+
+    this.scene.add(particles)
+
+    const tempPosition = new Vector3()
+    const tempObject = new Object3D()
+
+    for (let i = 0; i < this.config.particlesCount; i++) {
+      this.sampler.sample(tempPosition)
+      tempObject.position.copy(tempPosition)
+      tempObject.scale.setScalar(0.5 + Math.random()*0.5)
+      tempObject.updateMatrix()
+      particles.setMatrixAt(i, tempObject.matrix)
+    }
   }
 
   _createDebugPanel() {
