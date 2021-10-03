@@ -124,11 +124,11 @@ class App {
         uTime: {
           value: 0
         },
-        uInfluence: {
-          value: this.config.influence
-        },
         uDirection: {
           value: new Vector3()
+        },
+        uRandom: {
+          value: 0
         }
       }
     })
@@ -152,6 +152,7 @@ class App {
       const dir = new Vector3()
       dir.subVectors(tempPosition, center).normalize()
       this.particles.setUniformAt('uDirection', i, dir)
+      this.particles.setUniformAt('uRandom', i, Math.random())
     }
 
     geom.setAttribute('aDirection', new Float32BufferAttribute(directions, 3))
@@ -172,10 +173,6 @@ class App {
 
     sceneFolder.addInput(params, 'background', { label: 'Background Color' }).on('change', e => {
       this.renderer.setClearColor(new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255))
-    })
-
-    sceneFolder.addInput(this.config, 'influence', { label: 'Influence', min: 0, max: 5 }).on('change', e => {
-      this.particles.material.uniforms.uInfluence.value = e.value
     })
   }
 

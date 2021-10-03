@@ -4,9 +4,10 @@ varying float vAlpha;
 uniform vec3 uDirection;
 uniform float uTime;
 uniform float uInfluence;
+uniform float uRandom;
 
 void main() {
-  float progress = fract(uTime*0.4);
+  float progress = fract(uTime*0.4*uRandom);
 
   float alpha = smoothstep(0., .4, progress);
   alpha *= smoothstep(1., .4, progress);
