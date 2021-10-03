@@ -9,13 +9,15 @@ import {
   Clock,
   SphereGeometry,
   MeshBasicMaterial,
-  InstancedMesh,
   Vector3,
-  Object3D
+  Object3D,
+  Float32BufferAttribute
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler'
+
+import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 
 import { Pane } from 'tweakpane'
 
@@ -24,8 +26,11 @@ class App {
     this.container = document.querySelector(container)
 
     this.config = {
-      particlesCount: 1000
+      particlesCount: 1500,
+      influence: 0
     }
+
+    this.tick = 0
 
     this._resizeCb = () => this._onResize()
   }
@@ -57,6 +62,8 @@ class App {
 
   _update() {
     const elapsed = this.clock.getElapsedTime()
+
+    this.particles.material.uniforms.uTime.value = elapsed
   }
 
   _render() {
@@ -112,24 +119,45 @@ class App {
     const material = new ShaderMaterial({
       vertexShader: require('./shaders/particle.vertex.glsl'),
       fragmentShader: require('./shaders/particle.fragment.glsl'),
-      transparent: false
+      transparent: false,
+      uniforms: {
+        uTime: {
+          value: 0
+        },
+        uInfluence: {
+          value: this.config.influence
+        },
+        uDirection: {
+          value: new Vector3()
+        }
+      }
     })
 
-    const particles = new InstancedMesh(geom, material, this.config.particlesCount)
-
-    this.scene.add(particles)
+    this.particles = new InstancedUniformsMesh(geom, material, this.config.particlesCount)
 
     const tempPosition = new Vector3()
     const tempObject = new Object3D()
+    const center = new Vector3()
+
+    const directions = []
 
     for (let i = 0; i < this.config.particlesCount; i++) {
       this.sampler.sample(tempPosition)
       tempObject.position.copy(tempPosition)
       tempObject.scale.setScalar(0.5 + Math.random()*0.5)
       tempObject.updateMatrix()
-      particles.setMatrixAt(i, tempObject.matrix)
-      particles.instanceMatrix.needsUpdate = true
+      this.particles.setMatrixAt(i, tempObject.matrix)
+
+      // Set direction of the particle
+      const dir = new Vector3()
+      dir.subVectors(tempPosition, center).normalize()
+      this.particles.setUniformAt('uDirection', i, dir)
     }
+
+    geom.setAttribute('aDirection', new Float32BufferAttribute(directions, 3))
+    geom.attributes.aDirection.needsUpdate = true
+
+    this.scene.add(this.particles)
   }
 
   _createDebugPanel() {
@@ -144,6 +172,10 @@ class App {
 
     sceneFolder.addInput(params, 'background', { label: 'Background Color' }).on('change', e => {
       this.renderer.setClearColor(new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255))
+    })
+
+    sceneFolder.addInput(this.config, 'influence', { label: 'Influence', min: 0, max: 5 }).on('change', e => {
+      this.particles.material.uniforms.uInfluence.value = e.value
     })
   }
 
