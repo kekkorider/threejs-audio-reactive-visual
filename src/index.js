@@ -100,8 +100,6 @@ class App {
     })
 
     this.sphere = new Mesh(geom, mat)
-
-    // this.scene.add(this.sphere)
   }
 
   _createSampler() {
@@ -111,8 +109,10 @@ class App {
   _createParticles() {
     const geom = new SphereGeometry(0.02, 6, 6)
 
-    const material = new MeshBasicMaterial({
-      color: 0xff0000
+    const material = new ShaderMaterial({
+      vertexShader: require('./shaders/particle.vertex.glsl'),
+      fragmentShader: require('./shaders/particle.fragment.glsl'),
+      transparent: false
     })
 
     const particles = new InstancedMesh(geom, material, this.config.particlesCount)
@@ -128,6 +128,7 @@ class App {
       tempObject.scale.setScalar(0.5 + Math.random()*0.5)
       tempObject.updateMatrix()
       particles.setMatrixAt(i, tempObject.matrix)
+      particles.instanceMatrix.needsUpdate = true
     }
   }
 
