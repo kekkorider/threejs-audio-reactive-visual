@@ -1,11 +1,17 @@
 varying vec2 vUv;
+varying float vAlpha;
 
 uniform vec3 uDirection;
 uniform float uTime;
 uniform float uInfluence;
 
 void main() {
-  vec3 pos = position + uDirection*uInfluence;
+  float progress = fract(uTime*0.4);
+
+  float alpha = smoothstep(0., .4, progress);
+  alpha *= smoothstep(1., .4, progress);
+
+  vec3 pos = position + uDirection*progress;
   vec4 mvPosition = vec4(pos, 1.0);
   mvPosition = instanceMatrix * mvPosition;
 
@@ -13,4 +19,5 @@ void main() {
   gl_Position = projectionMatrix * modelViewPosition;
 
   vUv = uv;
+  vAlpha = alpha;
 }

@@ -119,7 +119,7 @@ class App {
     const material = new ShaderMaterial({
       vertexShader: require('./shaders/particle.vertex.glsl'),
       fragmentShader: require('./shaders/particle.fragment.glsl'),
-      transparent: false,
+      transparent: true,
       uniforms: {
         uTime: {
           value: 0
