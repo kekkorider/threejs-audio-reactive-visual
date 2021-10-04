@@ -12,7 +12,8 @@ import {
   Vector3,
   Object3D,
   Float32BufferAttribute,
-  Group
+  Group,
+  IcosahedronGeometry
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -42,6 +43,7 @@ class App {
     this._createCamera()
     this._createRenderer()
     this._createMainGroup()
+    this._createIcosahedron()
     this._createSphere()
     this._createSampler()
     this._createParticles()
@@ -68,6 +70,8 @@ class App {
 
     this.mainGroup.rotation.y += 0.002
     this.mainGroup.rotation.z += 0.0012
+
+    this.icosahedron.rotation.x += 0.009
 
     this.particles.material.uniforms.uTime.value = elapsed
   }
@@ -176,6 +180,20 @@ class App {
     geom.attributes.aDirection.needsUpdate = true
 
     this.mainGroup.add(this.particles)
+  }
+
+  _createIcosahedron() {
+    const geom = new IcosahedronGeometry(0.4, 0)
+    const mat = new MeshBasicMaterial({
+      color: 0xffffff,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.5
+    })
+
+    this.icosahedron = new Mesh(geom, mat)
+
+    this.mainGroup.add(this.icosahedron)
   }
 
   _createDebugPanel() {
