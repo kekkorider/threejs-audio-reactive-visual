@@ -28,7 +28,6 @@ class App {
 
     this.config = {
       particlesCount: 3000,
-      influence: 0,
       colorA: new Color('#A9E4D7').multiplyScalar(255),
       colorB: new Color('#664E88').multiplyScalar(255)
     }
