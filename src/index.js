@@ -13,11 +13,17 @@ import {
   Object3D,
   Float32BufferAttribute,
   Group,
-  IcosahedronGeometry
+  IcosahedronGeometry,
+  AdditiveBlending,
+  Vector2
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler'
+
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
 
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 
@@ -28,9 +34,10 @@ class App {
     this.container = document.querySelector(container)
 
     this.config = {
-      particlesCount: 3000,
-      colorA: new Color('#A9E4D7').multiplyScalar(255),
-      colorB: new Color('#664E88').multiplyScalar(255)
+      particlesCount: 4000,
+      bloomStrength: 1.5,
+      bloomThreshold: 0.3,
+      bloomRadius: 0.5
     }
 
     this.tick = 0
@@ -42,6 +49,7 @@ class App {
     this._createScene()
     this._createCamera()
     this._createRenderer()
+    this._createPostprocess()
     this._createMainGroup()
     this._createIcosahedron()
     this._createSphere()
@@ -77,7 +85,7 @@ class App {
   }
 
   _render() {
-    this.renderer.render(this.scene, this.camera)
+    this.composer.render()
   }
 
   _createScene() {
@@ -100,6 +108,21 @@ class App {
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
     this.renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio))
     this.renderer.setClearColor(0x121212)
+  }
+
+  _createPostprocess() {
+    this.renderPass = new RenderPass(this.scene, this.camera)
+
+    const resolution = new Vector2(this.container.clientWidth, this.container.clientHeight)
+
+    this.bloomPass = new UnrealBloomPass(resolution, 0, 0, 0)
+    this.bloomPass.threshold = this.config.bloomThreshold
+    this.bloomPass.strength = this.config.bloomStrength
+    this.bloomPass.radius = this.config.bloomRadius
+
+    this.composer = new EffectComposer(this.renderer)
+    this.composer.addPass(this.renderPass)
+    this.composer.addPass(this.bloomPass)
   }
 
   _createControls() {
@@ -135,6 +158,7 @@ class App {
       vertexShader: require('./shaders/particle.vertex.glsl'),
       fragmentShader: require('./shaders/particle.fragment.glsl'),
       transparent: true,
+      blending: AdditiveBlending,
       uniforms: {
         uTime: {
           value: 0
@@ -144,12 +168,6 @@ class App {
         },
         uRandom: {
           value: 0
-        },
-        uColorA: {
-          value: this.config.colorA
-        },
-        uColorB: {
-          value: this.config.colorB
         }
       }
     })
@@ -210,10 +228,19 @@ class App {
       this.renderer.setClearColor(new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255))
     })
 
-    const particlesFolder = this.pane.addFolder({ title: 'Particles' })
+    const ppFolder = this.pane.addFolder({ title: 'Bloom' })
 
-    particlesFolder.addInput(this.config, 'colorA', { label: 'Color A' })
-    particlesFolder.addInput(this.config, 'colorB', { label: 'Color B' })
+    ppFolder.addInput(this.config, 'bloomStrength', { label: 'Strength', min: 0, max: 3 }).on('change', e => {
+      this.bloomPass.strength = e.value
+    })
+
+    ppFolder.addInput(this.config, 'bloomThreshold', { label: 'Threshold', min: 0, max: 1 }).on('change', e => {
+      this.bloomPass.threshold = e.value
+    })
+
+    ppFolder.addInput(this.config, 'bloomRadius', { label: 'Radius', min: 0, max: 1 }).on('change', e => {
+      this.bloomPass.radius = e.value
+    })
   }
 
   _createClock() {
@@ -231,7 +258,9 @@ class App {
   _onResize() {
     this.camera.aspect = this.container.clientWidth / this.container.clientHeight
     this.camera.updateProjectionMatrix()
+
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
+    this.composer.setSize(this.container.clientWidth, this.container.clientHeight)
   }
 }
 
