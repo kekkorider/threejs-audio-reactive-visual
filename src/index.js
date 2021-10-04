@@ -24,6 +24,7 @@ import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
+import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass'
 
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 
@@ -35,9 +36,9 @@ class App {
 
     this.config = {
       particlesCount: 4000,
-      bloomStrength: 1.5,
-      bloomThreshold: 0.3,
-      bloomRadius: 0.5
+      bloomStrength: 1.24,
+      bloomThreshold: 0.66,
+      bloomRadius: 0.05
     }
 
     this.tick = 0
@@ -120,8 +121,12 @@ class App {
     this.bloomPass.strength = this.config.bloomStrength
     this.bloomPass.radius = this.config.bloomRadius
 
+    this.afterimagePass = new AfterimagePass()
+    this.afterimagePass.uniforms.damp.value = 0.6
+
     this.composer = new EffectComposer(this.renderer)
     this.composer.addPass(this.renderPass)
+    this.composer.addPass(this.afterimagePass)
     this.composer.addPass(this.bloomPass)
   }
 
@@ -228,19 +233,23 @@ class App {
       this.renderer.setClearColor(new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255))
     })
 
-    const ppFolder = this.pane.addFolder({ title: 'Bloom' })
+    /**
+     * Bloom
+     */
+    const bloomFolder = this.pane.addFolder({ title: 'Bloom' })
 
-    ppFolder.addInput(this.config, 'bloomStrength', { label: 'Strength', min: 0, max: 3 }).on('change', e => {
-      this.bloomPass.strength = e.value
-    })
+    bloomFolder.addInput(this.bloomPass, 'enabled', { label: 'Enabled' })
+    bloomFolder.addInput(this.bloomPass, 'strength', { label: 'Strength', min: 0, max: 3 })
+    bloomFolder.addInput(this.bloomPass, 'threshold', { label: 'Threshold', min: 0, max: 1 })
+    bloomFolder.addInput(this.bloomPass, 'radius', { label: 'Radius', min: 0, max: 1 })
 
-    ppFolder.addInput(this.config, 'bloomThreshold', { label: 'Threshold', min: 0, max: 1 }).on('change', e => {
-      this.bloomPass.threshold = e.value
-    })
+    /**
+     * Afterimage
+     */
+    const afterimageFolder = this.pane.addFolder({ title: 'Afterimage' })
 
-    ppFolder.addInput(this.config, 'bloomRadius', { label: 'Radius', min: 0, max: 1 }).on('change', e => {
-      this.bloomPass.radius = e.value
-    })
+    afterimageFolder.addInput(this.afterimagePass, 'enabled', { label: 'Enabled' })
+    afterimageFolder.addInput(this.afterimagePass.uniforms.damp, 'value', { label: 'Damp', min: 0, max: 1 })
   }
 
   _createClock() {
