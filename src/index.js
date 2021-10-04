@@ -11,7 +11,8 @@ import {
   MeshBasicMaterial,
   Vector3,
   Object3D,
-  Float32BufferAttribute
+  Float32BufferAttribute,
+  Group
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -26,8 +27,10 @@ class App {
     this.container = document.querySelector(container)
 
     this.config = {
-      particlesCount: 1500,
-      influence: 0
+      particlesCount: 3000,
+      influence: 0,
+      colorA: new Color('#A9E4D7').multiplyScalar(255),
+      colorB: new Color('#664E88').multiplyScalar(255)
     }
 
     this.tick = 0
@@ -39,6 +42,7 @@ class App {
     this._createScene()
     this._createCamera()
     this._createRenderer()
+    this._createMainGroup()
     this._createSphere()
     this._createSampler()
     this._createParticles()
@@ -63,6 +67,9 @@ class App {
   _update() {
     const elapsed = this.clock.getElapsedTime()
 
+    this.mainGroup.rotation.y += 0.002
+    this.mainGroup.rotation.z += 0.0012
+
     this.particles.material.uniforms.uTime.value = elapsed
   }
 
@@ -76,7 +83,7 @@ class App {
 
   _createCamera() {
     this.camera = new PerspectiveCamera(75, this.container.clientWidth / this.container.clientHeight, 0.1, 100)
-    this.camera.position.set(0, 0, 3)
+    this.camera.position.set(0, 0, 2)
   }
 
   _createRenderer() {
@@ -94,6 +101,11 @@ class App {
 
   _createControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+  }
+
+  _createMainGroup() {
+    this.mainGroup = new Group()
+    this.scene.add(this.mainGroup)
   }
 
   _createSphere() {
@@ -114,7 +126,7 @@ class App {
   }
 
   _createParticles() {
-    const geom = new SphereGeometry(0.02, 6, 6)
+    const geom = new SphereGeometry(0.01, 16, 16)
 
     const material = new ShaderMaterial({
       vertexShader: require('./shaders/particle.vertex.glsl'),
@@ -129,6 +141,12 @@ class App {
         },
         uRandom: {
           value: 0
+        },
+        uColorA: {
+          value: this.config.colorA
+        },
+        uColorB: {
+          value: this.config.colorB
         }
       }
     })
@@ -158,7 +176,7 @@ class App {
     geom.setAttribute('aDirection', new Float32BufferAttribute(directions, 3))
     geom.attributes.aDirection.needsUpdate = true
 
-    this.scene.add(this.particles)
+    this.mainGroup.add(this.particles)
   }
 
   _createDebugPanel() {
@@ -174,6 +192,11 @@ class App {
     sceneFolder.addInput(params, 'background', { label: 'Background Color' }).on('change', e => {
       this.renderer.setClearColor(new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255))
     })
+
+    const particlesFolder = this.pane.addFolder({ title: 'Particles' })
+
+    particlesFolder.addInput(this.config, 'colorA', { label: 'Color A' })
+    particlesFolder.addInput(this.config, 'colorB', { label: 'Color B' })
   }
 
   _createClock() {
