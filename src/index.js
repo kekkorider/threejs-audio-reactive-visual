@@ -37,6 +37,7 @@ class App {
 
     this.config = {
       backgroundColor: new Color('black').multiplyScalar(255),
+      particlesSpeed: 0,
       particlesCount: 3000,
       bloomStrength: 1.24,
       bloomThreshold: 0.66,
@@ -88,7 +89,8 @@ class App {
     this.bigSphere.rotation.z -= 0.003
     this.bigSphere.rotation.y -= 0.001
 
-    this.particles.material.uniforms.uTime.value = elapsed
+    this.particles.material.uniforms.uTime.value += 0.05*this.config.particlesSpeed
+
     this.bigSphere.material.uniforms.uTime.value = elapsed
   }
 
@@ -192,7 +194,7 @@ class App {
       transparent: true,
       blending: AdditiveBlending,
       uniforms: {
-        uTime: { value: 0 },
+        uTime: { value: 1 },
         uDirection: { value: new Vector3() },
         uRandom: { value: 0 },
         uInfluence: { value: 0 }
@@ -254,6 +256,7 @@ class App {
     })
 
     sceneFolder.addInput(this.particles.material.uniforms.uInfluence, 'value', { label: 'Influence', min: 0, max: 1 })
+    sceneFolder.addInput(this.config, 'particlesSpeed', { label: 'Speed', min: 0, max: 1 })
 
     /**
      * Bloom
