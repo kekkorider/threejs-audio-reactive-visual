@@ -46,7 +46,7 @@ class App {
       cameraRadius: 4.5,
       particlesSpeed: 0,
       particlesCount: 3000,
-      bloomStrength: 2.35,
+      bloomStrength: 1.45,
       bloomThreshold: 0.5,
       bloomRadius: 0.5
     }
@@ -77,8 +77,22 @@ class App {
       this._render()
     })
 
-    document.querySelector('#audio-btn')
-      .addEventListener('click', () => this._loadMusic(), { once: true })
+    const audioBtn = document.querySelector('#audio-btn')
+    audioBtn
+      .addEventListener('click', () => {
+        const tl = new gsap.timeline({
+          onComplete: () => {
+            this._loadMusic()
+          }
+        })
+
+        tl
+          .set('#audio-btn-icon', { transition: 'none' })
+          .to('#audio-btn-label', { '--clip': 1, duration: 0.6 })
+          .to('#audio-btn-icon', { rotation: 140, scale: 0.8, duration: 0.5 }, '<0.05')
+          .to('#audio-btn-icon', { opacity: 0, duration: 0.65 }, '<')
+          .to(audioBtn, { width: 66, ease: 'back.inOut(2)', duration: 0.9}, '<0.2')
+      }, { once: true })
 
     console.log(this)
   }
@@ -317,7 +331,7 @@ class App {
           onComplete: () => {
             this.music.setBuffer(buffer)
             this.music.setLoop(true)
-            this.music.setVolume(0)
+            this.music.setVolume(0.1)
 
             this.analyser = new AudioAnalyser(this.music, 128)
 
@@ -329,11 +343,26 @@ class App {
 
 
         tl
+          .add('start')
+          .to('#audio-btn', {
+            scale: 0,
+            duration: 0.6,
+            ease: 'back.in(2)'
+          })
+          .to('#audio-btn', { autoAlpha: 0, duration: 0.65 }, 'start+=0.3')
+
           .to(this.config, {
             particlesSpeed: 0.55,
             cameraSpeed: 1,
             duration: 1.3
-          })
+          }, 'start')
+      }, progress => {
+        gsap.to('#audio-btn-loader', {
+          '--scale': () => progress.loaded / progress.total,
+          duration: 0.15,
+          overwrite: true,
+          ease: 'power1.out'
+        })
       })
     })
   }

@@ -15,10 +15,77 @@ body {
 }
 
 #audio-btn {
-  position: fixed;
+  align-items: center;
+  color: white;
+  background-color: #441F41;
+  border: none;
+  display: inline-flex;
+  justify-content: center;
+  position: absolute;
   left: 50%;
-  bottom: 50px;
+  bottom: 30px;
   transform: translate(-50%);
+  padding: 8px;
+  border-radius: 9999px;
+  cursor: pointer;
+  width: 240px;
+  overflow: hidden;
+  transition: 0.35s background-color;
+
+  svg {
+    flex: 0 0 50px;
+    transition: 0.35s transform;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  &:hover {
+    background-color: darken(#441F41, 3%);
+
+    svg {
+      transform: scale(1.2);
+    }
+  }
+
+  &:active {
+
+    svg {
+      transform: scale(0.9);
+    }
+  }
+}
+
+#audio-btn-label {
+  --clip: 0;
+
+  flex: 0 1 120px;
+  font-weight: 700;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+
+  clip-path: polygon(
+    calc(var(--clip) * 100%) 0%,
+    100% 0%,
+    100% 100%,
+    calc(var(--clip) * 100%) 100%
+  );
+}
+
+#audio-btn-loader {
+  --scale: 0;
+
+  position: absolute;
+  display: block;
+  background-color: #FBC40D;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: center bottom;
+  transform: scaleY(var(--scale));
 }
 
 .tp-dfwv {
