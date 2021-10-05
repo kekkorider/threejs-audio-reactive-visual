@@ -16,7 +16,11 @@ import {
   IcosahedronGeometry,
   AdditiveBlending,
   Vector2,
-  BackSide
+  BackSide,
+  AudioListener,
+  Audio,
+  AudioLoader,
+  AudioAnalyser
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -70,6 +74,9 @@ class App {
       this._render()
     })
 
+    document.querySelector('#audio-btn')
+      .addEventListener('click', () => this._loadMusic(), { once: true })
+
     console.log(this)
   }
 
@@ -92,6 +99,15 @@ class App {
     this.particles.material.uniforms.uTime.value += 0.05*this.config.particlesSpeed
 
     this.bigSphere.material.uniforms.uTime.value = elapsed
+
+    if (!!this.analyser) {
+      const d = this.analyser.getFrequencyData()
+
+      let o = d.reduce((prev, curr) => prev + curr, 0)
+      o = o / d.length * 0.03
+
+      this.particles.material.uniforms.uInfluence.value = o
+    }
   }
 
   _render() {
@@ -275,6 +291,29 @@ class App {
 
     afterimageFolder.addInput(this.afterimagePass, 'enabled', { label: 'Enabled' })
     afterimageFolder.addInput(this.afterimagePass.uniforms.damp, 'value', { label: 'Damp', min: 0, max: 1 })
+  }
+
+  _loadMusic() {
+    return new Promise(resolve => {
+      const listener = new AudioListener()
+      this.camera.add(listener)
+
+      this.music = new Audio(listener)
+      this.scene.add(this.music)
+
+      const loader = new AudioLoader()
+      loader.load('/music.mp3', buffer => {
+        this.music.setBuffer(buffer)
+        this.music.setLoop(true)
+        this.music.setVolume(0.1)
+
+        this.analyser = new AudioAnalyser(this.music, 128)
+
+        this.music.play()
+
+        resolve()
+      })
+    })
   }
 
   _createClock() {
