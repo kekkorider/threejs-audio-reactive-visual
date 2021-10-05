@@ -4,6 +4,7 @@ varying vec3 vColor;
 uniform vec3 uDirection;
 uniform float uTime;
 uniform float uRandom;
+uniform float uInfluence;
 uniform vec3 uColorA;
 uniform vec3 uColorB;
 
@@ -11,14 +12,14 @@ uniform vec3 uColorB;
 #pragma glslify: palette = require('./modules/palette.glsl')
 
 void main() {
-  float progress = fract(uTime*0.4*uRandom);
+  float progress = fract(uTime*0.5*uRandom);
 
   float alpha = smoothstep(0., .2, progress);
   alpha *= smoothstep(1., .6, progress);
 
   float n = noise(position + uTime*0.3);
 
-  vec3 pos = position + uDirection*progress + uDirection*n;
+  vec3 pos = position + uDirection*progress + uDirection*uInfluence*0.3;
 
   vec4 mvPosition = vec4(pos, 1.0);
   mvPosition = instanceMatrix * mvPosition;

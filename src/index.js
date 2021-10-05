@@ -37,7 +37,7 @@ class App {
 
     this.config = {
       backgroundColor: new Color('black').multiplyScalar(255),
-      particlesCount: 4000,
+      particlesCount: 3000,
       bloomStrength: 1.24,
       bloomThreshold: 0.66,
       bloomRadius: 0.05
@@ -102,7 +102,7 @@ class App {
 
   _createCamera() {
     this.camera = new PerspectiveCamera(75, this.container.clientWidth / this.container.clientHeight, 0.1, 100)
-    this.camera.position.set(0, 0, 2.5)
+    this.camera.position.set(0, 0, 4.5)
   }
 
   _createRenderer() {
@@ -147,7 +147,7 @@ class App {
   }
 
   _createSphere() {
-    const geom = new SphereGeometry(1, 32, 16)
+    const geom = new SphereGeometry(2, 32, 16)
 
     const mat = new MeshBasicMaterial({
       color: 0xffffff,
@@ -192,15 +192,10 @@ class App {
       transparent: true,
       blending: AdditiveBlending,
       uniforms: {
-        uTime: {
-          value: 0
-        },
-        uDirection: {
-          value: new Vector3()
-        },
-        uRandom: {
-          value: 0
-        }
+        uTime: { value: 0 },
+        uDirection: { value: new Vector3() },
+        uRandom: { value: 0 },
+        uInfluence: { value: 0 }
       }
     })
 
@@ -233,7 +228,7 @@ class App {
   }
 
   _createIcosahedron() {
-    const geom = new IcosahedronGeometry(0.4, 0)
+    const geom = new IcosahedronGeometry(1.2, 0)
     const mat = new MeshBasicMaterial({
       color: 0xffffff,
       wireframe: true,
@@ -257,6 +252,8 @@ class App {
     sceneFolder.addInput(this.config, 'backgroundColor', { label: 'Background Color' }).on('change', e => {
       this.renderer.setClearColor(new Color(e.value.r, e.value.g, e.value.b).multiplyScalar(1 / 255))
     })
+
+    sceneFolder.addInput(this.particles.material.uniforms.uInfluence, 'value', { label: 'Influence', min: 0, max: 1 })
 
     /**
      * Bloom
