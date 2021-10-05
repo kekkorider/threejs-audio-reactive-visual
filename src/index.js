@@ -42,6 +42,8 @@ class App {
 
     this.config = {
       backgroundColor: new Color('#0d021f'),
+      cameraSpeed: 0,
+      cameraRadius: 4.5,
       particlesSpeed: 0,
       particlesCount: 3000,
       bloomStrength: 2.35,
@@ -109,6 +111,12 @@ class App {
       this.particles.material.uniforms.uInfluence.value = o / d.length * 0.03
 
       this.icosahedron.scale.setScalar(1 - o / d.length * 0.006)
+
+      this.tick += 0.01
+      this.camera.position.x = Math.sin(this.tick*0.6)*2.7*this.config.cameraSpeed
+      this.camera.position.y = Math.sin(this.tick*0.4)*2.15*this.config.cameraSpeed
+      this.camera.position.z = Math.cos(this.tick*0.35)*this.config.cameraRadius*this.config.cameraSpeed
+      this.camera.lookAt(this.scene.position)
     }
   }
 
@@ -122,7 +130,7 @@ class App {
 
   _createCamera() {
     this.camera = new PerspectiveCamera(75, this.container.clientWidth / this.container.clientHeight, 0.1, 100)
-    this.camera.position.set(0, 0, 4.5)
+    this.camera.position.set(0, 0, this.config.cameraRadius)
   }
 
   _createRenderer() {
@@ -305,13 +313,11 @@ class App {
 
       const loader = new AudioLoader()
       loader.load('/music.mp3', buffer => {
-        gsap.to(this.config, {
-          particlesSpeed: 0.55,
-          duration: 1.3,
+        const tl = new gsap.timeline({
           onComplete: () => {
             this.music.setBuffer(buffer)
             this.music.setLoop(true)
-            this.music.setVolume(0.01)
+            this.music.setVolume(0)
 
             this.analyser = new AudioAnalyser(this.music, 128)
 
@@ -320,6 +326,14 @@ class App {
             resolve()
           }
         })
+
+
+        tl
+          .to(this.config, {
+            particlesSpeed: 0.55,
+            cameraSpeed: 1,
+            duration: 1.3
+          })
       })
     })
   }
