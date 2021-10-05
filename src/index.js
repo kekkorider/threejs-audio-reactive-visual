@@ -41,12 +41,12 @@ class App {
     this.container = document.querySelector(container)
 
     this.config = {
-      backgroundColor: new Color('black').multiplyScalar(255),
+      backgroundColor: new Color('#0d021f'),
       particlesSpeed: 0,
       particlesCount: 3000,
-      bloomStrength: 1.24,
-      bloomThreshold: 0.66,
-      bloomRadius: 0.05
+      bloomStrength: 2.35,
+      bloomThreshold: 0.5,
+      bloomRadius: 0.5
     }
 
     this.tick = 0
@@ -104,10 +104,11 @@ class App {
     if (!!this.analyser) {
       const d = this.analyser.getFrequencyData()
 
-      let o = d.reduce((prev, curr) => prev + curr, 0)
-      o = o / d.length * 0.03
+      const o = d.reduce((prev, curr) => prev + curr, 0)
 
-      this.particles.material.uniforms.uInfluence.value = o
+      this.particles.material.uniforms.uInfluence.value = o / d.length * 0.03
+
+      this.icosahedron.scale.setScalar(1 - o / d.length * 0.006)
     }
   }
 
@@ -191,7 +192,7 @@ class App {
       }
     })
 
-    const geom = new SphereGeometry(5, 120, 60)
+    const geom = new SphereGeometry(6.5, 120, 60)
 
     this.bigSphere = new Mesh(geom, material)
 
@@ -269,7 +270,7 @@ class App {
     const sceneFolder = this.pane.addFolder({ title: 'Scene' })
 
     sceneFolder.addInput(this.config, 'backgroundColor', { label: 'Background Color' }).on('change', e => {
-      this.renderer.setClearColor(new Color(e.value.r, e.value.g, e.value.b).multiplyScalar(1 / 255))
+      this.renderer.setClearColor(new Color(e.value.r, e.value.g, e.value.b))
     })
 
     sceneFolder.addInput(this.particles.material.uniforms.uInfluence, 'value', { label: 'Influence', min: 0, max: 1 })
@@ -305,8 +306,8 @@ class App {
       const loader = new AudioLoader()
       loader.load('/music.mp3', buffer => {
         gsap.to(this.config, {
-          particlesSpeed: 0.7,
-          duration: 1,
+          particlesSpeed: 0.55,
+          duration: 1.3,
           onComplete: () => {
             this.music.setBuffer(buffer)
             this.music.setLoop(true)

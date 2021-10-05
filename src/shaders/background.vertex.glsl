@@ -8,6 +8,7 @@ varying vec3 vColor;
 
 void main() {
   float n = noise(position*0.2 + uTime*0.1);
+  n = n*0.5 + 0.5;
 
   vec3 pos = position;
   vec3 dir = normalize(pos - vec3(0.0));
