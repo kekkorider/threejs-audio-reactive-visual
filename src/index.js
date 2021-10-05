@@ -311,11 +311,11 @@ class App {
           onComplete: () => {
             this.music.setBuffer(buffer)
             this.music.setLoop(true)
-            this.music.setVolume(0.1)
+            this.music.setVolume(0.01)
 
             this.analyser = new AudioAnalyser(this.music, 128)
 
-            this.music.play()
+            gsap.delayedCall(0.3, () => this.music.play())
 
             resolve()
           }
