@@ -15,7 +15,8 @@ import {
   Group,
   IcosahedronGeometry,
   AdditiveBlending,
-  Vector2
+  Vector2,
+  BackSide
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -35,6 +36,7 @@ class App {
     this.container = document.querySelector(container)
 
     this.config = {
+      backgroundColor: new Color('black').multiplyScalar(255),
       particlesCount: 4000,
       bloomStrength: 1.24,
       bloomThreshold: 0.66,
@@ -53,6 +55,7 @@ class App {
     this._createPostprocess()
     this._createMainGroup()
     this._createIcosahedron()
+    this._createBigSphere()
     this._createSphere()
     this._createSampler()
     this._createParticles()
@@ -82,7 +85,11 @@ class App {
 
     this.icosahedron.rotation.x += 0.009
 
+    this.bigSphere.rotation.z -= 0.003
+    this.bigSphere.rotation.y -= 0.001
+
     this.particles.material.uniforms.uTime.value = elapsed
+    this.bigSphere.material.uniforms.uTime.value = elapsed
   }
 
   _render() {
@@ -95,7 +102,7 @@ class App {
 
   _createCamera() {
     this.camera = new PerspectiveCamera(75, this.container.clientWidth / this.container.clientHeight, 0.1, 100)
-    this.camera.position.set(0, 0, 2)
+    this.camera.position.set(0, 0, 2.5)
   }
 
   _createRenderer() {
@@ -108,7 +115,7 @@ class App {
 
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
     this.renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio))
-    this.renderer.setClearColor(0x121212)
+    this.renderer.setClearColor(this.config.backgroundColor)
   }
 
   _createPostprocess() {
@@ -150,6 +157,26 @@ class App {
     })
 
     this.sphere = new Mesh(geom, mat)
+  }
+
+  _createBigSphere() {
+    const material = new ShaderMaterial({
+      fragmentShader: require('./shaders/background.fragment.glsl'),
+      vertexShader: require('./shaders/background.vertex.glsl'),
+      side: BackSide,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.1,
+      uniforms: {
+        uTime: { value: 0 }
+      }
+    })
+
+    const geom = new SphereGeometry(5, 120, 60)
+
+    this.bigSphere = new Mesh(geom, material)
+
+    this.scene.add(this.bigSphere)
   }
 
   _createSampler() {
@@ -227,10 +254,8 @@ class App {
      */
     const sceneFolder = this.pane.addFolder({ title: 'Scene' })
 
-    let params = { background: { r: 18, g: 18, b: 18 } }
-
-    sceneFolder.addInput(params, 'background', { label: 'Background Color' }).on('change', e => {
-      this.renderer.setClearColor(new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255))
+    sceneFolder.addInput(this.config, 'backgroundColor', { label: 'Background Color' }).on('change', e => {
+      this.renderer.setClearColor(new Color(e.value.r, e.value.g, e.value.b).multiplyScalar(1 / 255))
     })
 
     /**
