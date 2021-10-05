@@ -17,6 +17,7 @@
     "sass": "^1.42.1"
   },
   "dependencies": {
+    "gsap": "^3.8.0",
     "three": "^0.133.0",
     "three-instanced-uniforms-mesh": "^0.43.0",
     "tweakpane": "^3.0.5"

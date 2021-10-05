@@ -34,6 +34,7 @@ import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh'
 
 import { Pane } from 'tweakpane'
+import { gsap } from 'gsap'
 
 class App {
   constructor(container) {
@@ -303,15 +304,21 @@ class App {
 
       const loader = new AudioLoader()
       loader.load('/music.mp3', buffer => {
-        this.music.setBuffer(buffer)
-        this.music.setLoop(true)
-        this.music.setVolume(0.1)
+        gsap.to(this.config, {
+          particlesSpeed: 0.7,
+          duration: 1,
+          onComplete: () => {
+            this.music.setBuffer(buffer)
+            this.music.setLoop(true)
+            this.music.setVolume(0.1)
 
-        this.analyser = new AudioAnalyser(this.music, 128)
+            this.analyser = new AudioAnalyser(this.music, 128)
 
-        this.music.play()
+            this.music.play()
 
-        resolve()
+            resolve()
+          }
+        })
       })
     })
   }
