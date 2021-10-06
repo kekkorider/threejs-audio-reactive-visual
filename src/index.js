@@ -47,7 +47,7 @@ class App {
       particlesSpeed: 0,
       particlesCount: 3000,
       bloomStrength: 1.45,
-      bloomThreshold: 0.5,
+      bloomThreshold: 0.34,
       bloomRadius: 0.5
     }
 
@@ -127,9 +127,9 @@ class App {
       this.icosahedron.scale.setScalar(1 - o / d.length * 0.006)
 
       this.tick += 0.01
-      this.camera.position.x = Math.sin(this.tick*0.6)*2.7*this.config.cameraSpeed
-      this.camera.position.y = Math.sin(this.tick*0.4)*2.15*this.config.cameraSpeed
-      this.camera.position.z = Math.cos(this.tick*0.35)*this.config.cameraRadius*this.config.cameraSpeed
+      this.camera.position.x = Math.sin(this.tick*0.63)*2.7*this.config.cameraSpeed
+      this.camera.position.y = Math.sin(this.tick*0.84)*2.15*this.config.cameraSpeed
+      this.camera.position.z = Math.cos(this.tick*0.39)*this.config.cameraRadius*this.config.cameraSpeed
       this.camera.lookAt(this.scene.position)
     }
   }
@@ -180,6 +180,7 @@ class App {
   }
 
   _createControls() {
+    if (process.env.NODE_ENV === 'production') return
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
   }
 
@@ -289,19 +290,19 @@ class App {
     /**
      * Scene configuration
      */
-    const sceneFolder = this.pane.addFolder({ title: 'Scene' })
+    // const sceneFolder = this.pane.addFolder({ title: 'Scene' })
 
-    sceneFolder.addInput(this.config, 'backgroundColor', { label: 'Background Color' }).on('change', e => {
-      this.renderer.setClearColor(new Color(e.value.r, e.value.g, e.value.b))
-    })
+    // sceneFolder.addInput(this.config, 'backgroundColor', { label: 'Background Color' }).on('change', e => {
+    //   this.renderer.setClearColor(new Color(e.value.r, e.value.g, e.value.b))
+    // })
 
-    sceneFolder.addInput(this.particles.material.uniforms.uInfluence, 'value', { label: 'Influence', min: 0, max: 1 })
-    sceneFolder.addInput(this.config, 'particlesSpeed', { label: 'Speed', min: 0, max: 1 })
+    // sceneFolder.addInput(this.particles.material.uniforms.uInfluence, 'value', { label: 'Influence', min: 0, max: 1 })
+    // sceneFolder.addInput(this.config, 'particlesSpeed', { label: 'Speed', min: 0, max: 1 })
 
     /**
      * Bloom
      */
-    const bloomFolder = this.pane.addFolder({ title: 'Bloom' })
+    const bloomFolder = this.pane.addFolder({ title: 'Bloom effect Options', expanded: false })
 
     bloomFolder.addInput(this.bloomPass, 'enabled', { label: 'Enabled' })
     bloomFolder.addInput(this.bloomPass, 'strength', { label: 'Strength', min: 0, max: 3 })
@@ -311,7 +312,7 @@ class App {
     /**
      * Afterimage
      */
-    const afterimageFolder = this.pane.addFolder({ title: 'Afterimage' })
+    const afterimageFolder = this.pane.addFolder({ title: 'Afterimage effect options', expanded: false })
 
     afterimageFolder.addInput(this.afterimagePass, 'enabled', { label: 'Enabled' })
     afterimageFolder.addInput(this.afterimagePass.uniforms.damp, 'value', { label: 'Damp', min: 0, max: 1 })
@@ -326,6 +327,7 @@ class App {
       this.scene.add(this.music)
 
       const loader = new AudioLoader()
+
       loader.load('/music.mp3', buffer => {
         const tl = new gsap.timeline({
           onComplete: () => {
@@ -340,7 +342,6 @@ class App {
             resolve()
           }
         })
-
 
         tl
           .add('start')

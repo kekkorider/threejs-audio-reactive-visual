@@ -42,7 +42,7 @@ body {
   }
 
   &:hover {
-    background-color: darken(#441F41, 3%);
+    background-color: lighten(#441F41, 5%);
 
     svg {
       transform: scale(1.2);
