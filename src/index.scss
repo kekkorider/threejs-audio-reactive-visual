@@ -1,4 +1,9 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   overflow: hidden;
   height: 100vh;
   margin: 0;
@@ -23,7 +28,7 @@ body {
   justify-content: center;
   position: absolute;
   left: 50%;
-  bottom: 30px;
+  top: 70%;
   transform: translate(-50%);
   padding: 8px;
   border-radius: 9999px;
@@ -90,4 +95,19 @@ body {
 
 .tp-dfwv {
   width: 350px !important;
+}
+
+#credits {
+  color: white;
+  position: absolute;
+  font-weight: 500;
+  left: 0;
+  line-height: 1.7;
+  bottom: 30px;
+  padding: 0 40px;
+  width: min(100vw, 600px);
+
+  a {
+    color: #FBC40D;
+  }
 }
