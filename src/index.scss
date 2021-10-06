@@ -28,7 +28,7 @@ body {
   justify-content: center;
   position: absolute;
   left: 50%;
-  top: 70%;
+  top: 60%;
   transform: translate(-50%);
   padding: 8px;
   border-radius: 9999px;
@@ -36,6 +36,10 @@ body {
   width: 240px;
   overflow: hidden;
   transition: 0.35s background-color;
+
+  @media (min-width: 800px) {
+    top: 70%;
+  }
 
   svg {
     flex: 0 0 50px;
